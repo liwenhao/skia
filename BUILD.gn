@@ -818,6 +818,27 @@ component("skia") {
   }
 }
 
+if (build_lua_module) {
+    shared_library("lua-skia") {
+      configs += skia_library_configs
+      output_prefix_override = true
+      output_name = "skia"
+      sources = [
+        "src/utils/SkLua.cpp",
+      ]
+      if (is_component_build) {
+        sources += [
+          "src/utils/SkTextBox.cpp",
+          "src/core/SkUtils.cpp",
+        ]
+      }
+      deps = [
+        ":skia",
+        "//third_party/lua",
+      ]
+    }
+}
+
 # Targets guarded by skia_enable_tools may use //third_party freely.
 if (skia_enable_tools) {
   # Used by gn_to_bp.py to list our public include dirs.

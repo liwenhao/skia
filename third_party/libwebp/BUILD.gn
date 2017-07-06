@@ -25,6 +25,7 @@ if (skia_use_system_libwebp) {
       # (It also swaps the color order for 4444, but we don't care today.)
       # TODO: swizzle ourself in SkWebpCodec instead of requiring this non-standard libwebp.
       "WEBP_SWAP_16BIT_CSP",
+      "SKIA",
     ]
   }
 

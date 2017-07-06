@@ -10,6 +10,7 @@ is_skia_standalone = true
 declare_args() {
   is_official_build = false
   is_component_build = false
+  build_lua_module = false
   ndk = ""
   if (target_cpu == "x86" || target_cpu == "mipsel" || target_cpu == "arm") {
     ndk_api = 18

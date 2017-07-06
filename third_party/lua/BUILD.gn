@@ -5,13 +5,41 @@
 
 declare_args() {
   skia_use_system_lua = is_official_build
+  system_lua_version = ""
+  lua_include_dir = getenv("LUA_INCDIR")
+  lua_lib = getenv("LUA_LIB")
+  lua_lib_dir = getenv("LUA_LIBDIR")
 }
 
 import("../third_party.gni")
 
 if (skia_use_system_lua) {
   system("lua") {
-    libs = [ "lua" ]
+    if (lua_include_dir == "") {
+      if (is_linux && system_lua_version != "") {
+        lua_include_dir = "/usr/include"
+      }
+    }
+
+    if (lua_lib == "") {
+      lua_lib = "lua"
+    }
+
+    if (system_lua_version != "") {
+      assert(lua_include_dir != "", "need lua include dir")
+      lua_include_dir = lua_include_dir + "/lua" + system_lua_version
+      lua_lib = lua_lib + system_lua_version
+    }
+    
+    libs = [ lua_lib ]
+
+    if (lua_include_dir != "") {
+      include_dirs = [ lua_include_dir ]
+    }
+
+    if (lua_lib_dir != "") {
+      lib_dirs = [ lua_lib_dir ]
+    }
   }
 } else {
   third_party("lua") {

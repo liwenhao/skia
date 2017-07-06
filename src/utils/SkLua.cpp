@@ -5,6 +5,25 @@
  * found in the LICENSE file.
  */
 
+extern "C" {
+    #include "lua.h"
+    #include "lualib.h"
+    #include "lauxlib.h"
+
+#if !defined(SKIA_DLL)
+    #define SKIA_DLL
+    #include "sk_types.h"
+    #undef SKIA_DLL
+#else
+    #include "sk_types.h"
+#endif
+    SK_API int luaopen_skia(lua_State* L);
+#if !defined(SKIA_DLL)
+    #undef SK_API
+    #define SK_API
+#endif
+}
+
 #include "SkLua.h"
 
 #if SK_SUPPORT_GPU
@@ -30,14 +49,9 @@
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
 
-extern "C" {
-    #include "lua.h"
-    #include "lualib.h"
-    #include "lauxlib.h"
-}
 
 // return the metatable name for a given class
-template <typename T> const char* get_mtname();
+template <typename T> static const char* get_mtname();
 #define DEF_MTNAME(T)                           \
     template <> const char* get_mtname<T>() {   \
         return #T "_LuaMetaTableName";          \
@@ -2060,7 +2074,8 @@ static void register_Sk(lua_State* L) {
     setfield_function(L, "newTextBlob", lsk_newTextBlob);
     setfield_function(L, "newTypeface", lsk_newTypeface);
     setfield_function(L, "newFontStyle", lsk_newFontStyle);
-    lua_pop(L, 1);  // pop off the Sk table
+
+    // the Sk table is still on top
 }
 
 #define REG_CLASS(L, C)                             \
@@ -2093,8 +2108,7 @@ void SkLua::Load(lua_State* L) {
     REG_CLASS(L, SkFontStyle);
 }
 
-extern "C" int luaopen_skia(lua_State* L);
 extern "C" int luaopen_skia(lua_State* L) {
     SkLua::Load(L);
-    return 0;
+    return 1; // return Sk table, so we can use as a local variable
 }
